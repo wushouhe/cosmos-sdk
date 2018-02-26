@@ -13,7 +13,7 @@ The governance process is divided in a few steps that are outlined below:
 - If the proposal involves a software upgrade
   - **Signal:** Validator start signaling that they are ready to switch to the new version
   - **Switch:** Once more than 2/3rd validators have signaled their readiness to switch, their software automatically flips to the new version
-  
+
 ## Proposal submission
 
 ### Right to submit a proposal
