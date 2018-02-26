@@ -2,50 +2,65 @@
 
 ## Overview
 
-The Cosmos Hub is a Tendermint-based Proof of Stake blockchain system that serves as a backbone of the Cosmos ecosystem.
-It is operated and secured by an open and globally decentralized set of validators. Tendermint consensus is a 
-Byzantine fault-tolerant distributed protocol that involves all validators in the process of exchanging protocol 
-messages in the production of each block. To avoid Nothing-at-Stake problem, a validator in Tendermint needs to lock up
-coins in a bond deposit. Tendermint protocol messages are signed by the validator's private key, and this is a basis for 
-Tendermint strict accountability that allows punishing misbehaving validators by slashing (burning) their bonded Atoms. 
-On the other hand, validators are for it's service of securing blockchain network rewarded by the inflationary 
-provisions and transactions fees. This incentivizes correct behavior of the validators and provide economic security 
-of the network.
+The Cosmos Hub is a Tendermint-based Proof of Stake blockchain system that 
+serves as a backbone of the Cosmos ecosystem. It is operated and secured by an 
+open and globally decentralized set of validators. Tendermint consensus is a 
+Byzantine fault-tolerant distributed protocol that involves all validators in 
+the process of exchanging protocol messages in the production of each block. To
+avoid Nothing-at-Stake problem, a validator in Tendermint needs to lock up 
+coins in a bond deposit. Tendermint protocol messages are signed by the 
+validator's private key, and this is a basis for Tendermint strict 
+accountability that allows punishing misbehaving validators by slashing 
+(burning) their bonded Atoms. On the other hand, validators are rewarded for 
+their service of securing blockchain network by the inflationary provisions and
+transactions fees. This incentivizes correct behavior of the validators and 
+provides the economic security of the network.
 
-The native token of the Cosmos Hub is called Atom; becoming a validator of the Cosmos Hub requires holding Atoms. 
-However, not all Atom holders are validators of the Cosmos Hub. More precisely, there is a selection process that 
-determines the validator set as a subset of all validator candidates (Atom holder that wants to 
-become a validator). The other option for Atom holder is to delegate their atoms to validators, i.e., 
-being a delegator. A delegator is an Atom holder that has bonded its Atoms by delegating it to a validator 
-(or validator candidate). By bonding Atoms to securing network (and taking a risk of being slashed in case the 
-validator misbehaves), a user is rewarded with inflationary provisions and transaction fees proportional to the amount 
-of its bonded Atoms. The Cosmos Hub is designed to efficiently facilitate a small numbers of validators (hundreds), and 
-large numbers of delegators (tens of thousands). More precisely, it is the role of the Staking module of the Cosmos Hub 
-to support various staking functionality including validator set selection; delegating, bonding and withdrawing Atoms; 
-and the distribution of inflationary provisions and transaction fees.
-  
+The native token of the Cosmos Hub is called Atom; becoming a validator of the 
+Cosmos Hub requires holding Atoms. However, not all Atom holders are validators
+of the Cosmos Hub. More precisely, there is a selection process that determines
+the validator set as a subset of all validator candidates (Atom holders that 
+wants to become a validator). The other option for Atom holder is to delegate 
+their atoms to validators, i.e., being a delegator. A delegator is an Atom 
+holder that has bonded its Atoms by delegating it to a validator (or validator 
+candidate). By bonding Atoms to secure the network (and taking a risk of being 
+slashed in case of misbehaviour), a user is rewarded with inflationary 
+provisions and transaction fees proportional to the amount of its bonded Atoms.
+The Cosmos Hub is designed to efficiently facilitate a small numbers of 
+validators (hundreds), and large numbers of delegators (tens of thousands). 
+More precisely, it is the role of the Staking module of the Cosmos Hub to
+support various staking functionality including validator set selection, 
+delegating, bonding and withdrawing Atoms, and the distribution of inflationary
+provisions and transaction fees.
+
 ## State
 
 The staking module persists the following information to the store:
-- `GlobalState`, describing the global pools and the inflation related fields
-- `map[PubKey]Candidate`, a map of validator candidates (including current validators), indexed by public key
-- `map[rational.Rat]Candidate`, an ordered map of validator candidates (including current validators), indexed by 
-shares in the global pool (bonded or unbonded depending on candidate status) 
-- `map[[]byte]DelegatorBond`, a map of DelegatorBonds (for each delegation to a candidate by a delegator), indexed by 
-the delegator address and the candidate public key
-- `queue[QueueElemUnbondDelegation]`, a queue of unbonding delegations
-- `queue[QueueElemReDelegate]`, a queue of re-delegations
+* `GlobalState`, describing the global pools and the inflation related fields
+* `map[PubKey]Candidate`, a map of validator candidates (including current 
+  validators), indexed by public key
+* `map[rational.Rat]Candidate`, an ordered map of validator candidates 
+  (including current validators), indexed by shares in the global pool (bonded
+  or unbonded depending on candidate status) 
+* `map[[]byte]DelegatorBond`, a map of DelegatorBonds (for each delegation to a 
+  candidate by a delegator), indexed by the delegator address and the candidate 
+  public key
+* `queue[QueueElemUnbondDelegation]`, a queue of unbonding delegations
+* `queue[QueueElemReDelegate]`, a queue of re-delegations
 
 ### Global State
 
-GlobalState data structure contains total Atoms supply, amount of Atoms in the bonded pool, sum of all shares 
-distributed for the bonded pool, amount of Atoms in the unbonded pool, sum of all shares distributed for the 
-unbonded pool, a timestamp of the last processing of inflation, the current annual inflation rate, a timestamp 
-for the last comission accounting reset, the global fee pool, a pool of reserve taxes collected for the governance use
-and an adjustment factor for calculating global fee accum. `Params` is global data structure that stores system 
-parameters and defines overall functioning of the module.    
-  
-``` golang
+The GlobalState data structure contains total Atom supply, amount of Atoms in 
+the bonded pool, sum of all shares distributed for the bonded pool, amount of 
+Atoms in the unbonded pool, sum of all shares distributed for the unbonded 
+pool, a timestamp of the last processing of inflation, the current annual 
+inflation rate, a timestamp for the last comission accounting reset, the global
+fee pool, a pool of reserve taxes collected for the governance use and an 
+adjustment factor for calculating global fee accum. `Params` is global data 
+structure that stores system parameters and defines overall functioning of the 
+module.
+
+``` go
 type GlobalState struct {
     TotalSupply              int64        // total supply of Atoms
     BondedPool               int64        // reserve of bonded tokens
@@ -84,10 +99,10 @@ type Params struct {
 
 ### Candidate
 
-The `Candidate` data structure holds the current state and some historical actions of
-validators or candidate-validators. 
+The `Candidate` data structure holds the current state and some historical 
+actions of validators or candidate-validators. 
 
-``` golang
+``` go
 type Candidate struct {
     Status                 CandidateStatus       
     PubKey                 crypto.PubKey
@@ -105,9 +120,7 @@ type Candidate struct {
     Adjustment             rational.Rat
     Description            Description 
 }
-```
- 
-``` golang
+
 type Description struct {
 	Name       string 
 	DateBonded string 
@@ -118,43 +131,47 @@ type Description struct {
 ```
 
 Candidate parameters are described:
- - Status: it can be Bonded (active validator), Unbonded (validator candidate) or Revoked
- - PubKey: candidate public key that is used strictly for participating in consensus
- - Owner: Address where coins are bonded from and unbonded to 
- - GlobalStakeShares: Represents shares of `GlobalState.BondedPool` if
-   `Candidate.Status` is `Bonded`; or shares of `GlobalState.UnbondedPool` otherwise
- - IssuedDelegatorShares: Sum of all shares a candidate issued to delegators (which
-   includes the candidate's self-bond); a delegator share represents their stake in
-   the Candidate's `GlobalStakeShares`
- - RedelegatingShares: The portion of `IssuedDelegatorShares` which are
-   currently re-delegating to a new validator
- - VotingPower: Proportional to the amount of bonded tokens which the validator
-   has if `Candidate.Status` is `Bonded`; otherwise it is equal to `0`
- - Commission:  The commission rate of fees charged to any delegators
- - CommissionMax:  The maximum commission rate this candidate can charge 
-   each day from the date `GlobalState.DateLastCommissionReset` 
- - CommissionChangeRate: The maximum daily increase of the candidate commission
- - CommissionChangeToday: Counter for the amount of change to commission rate 
-   which has occurred today, reset on the first block of each day (UTC time)
- - ProposerRewardPool: reward pool for extra fees collected when this candidate
-   is the proposer of a block
- - Adjustment factor used to passively calculate each validators entitled fees
-   from `GlobalState.FeePool`
- - Description
-   - Name: moniker
-   - DateBonded: date determined which the validator was bonded
-   - Identity: optional field to provide a signature which verifies the
-     validators identity (ex. UPort or Keybase)
-   - Website: optional website link
-   - Details: optional details
+* Status: it can be Bonded (active validator), Unbonded (validator candidate) 
+  or Revoked
+* PubKey: candidate public key that is used strictly for participating in 
+  consensus
+* Owner: Address where coins are bonded from and unbonded to 
+* GlobalStakeShares: Represents shares of `GlobalState.BondedPool` if 
+  `Candidate.Status` is `Bonded`; or shares of `GlobalState.UnbondedPool` 
+  otherwise
+* IssuedDelegatorShares: Sum of all shares a candidate issued to delegators 
+  (which includes the candidate's self-bond); a delegator share represents 
+  their stake in the Candidate's `GlobalStakeShares`
+* RedelegatingShares: The portion of `IssuedDelegatorShares` which are 
+  currently re-delegating to a new validator
+* VotingPower: Proportional to the amount of bonded tokens which the validator
+  has if `Candidate.Status` is `Bonded`; otherwise it is equal to `0`
+* Commission:  The commission rate of fees charged to any delegators
+* CommissionMax:  The maximum commission rate this candidate can charge each 
+  day from the date `GlobalState.DateLastCommissionReset` 
+* CommissionChangeRate: The maximum daily increase of the candidate commission
+* CommissionChangeToday: Counter for the amount of change to commission rate 
+  which has occurred today, reset on the first block of each day (UTC time)
+* ProposerRewardPool: reward pool for extra fees collected when this candidate
+  is the proposer of a block
+* Adjustment factor used to passively calculate each validators entitled fees
+  from `GlobalState.FeePool`
+* Description
+  * Name: moniker
+  * DateBonded: date determined which the validator was bonded
+  * Identity: optional field to provide a signature which verifies the 
+    validators identity (ex. UPort or Keybase)
+  * Website: optional website link
+  * Details: optional details
 
 ### DelegatorBond
 
 Atom holders may delegate coins to candidates; under this circumstance their
-funds are held in a `DelegatorBond` data structure. It is owned by one delegator, and is
-associated with the shares for one candidate. The sender of the transaction is the owner of the bond.  
+funds are held in a `DelegatorBond` data structure. It is owned by one 
+delegator, and is associated with the shares for one candidate. The sender of 
+the transaction is the owner of the bond.
 
-``` golang
+``` go
 type DelegatorBond struct {
 	Candidate            crypto.PubKey
 	Shares               rational.Rat
@@ -164,36 +181,37 @@ type DelegatorBond struct {
 ```
 
 Description: 
- - Candidate: the public key of the validator candidate: bonding too
- - Shares: the number of delegator shares received from the validator candidate
- - AdjustmentFeePool: Adjustment factor used to passively calculate each bonds
-   entitled fees from `GlobalState.FeePool`
- - AdjustmentRewardPool: Adjustment factor used to passively calculate each
-   bonds entitled fees from `Candidate.ProposerRewardPool`
-      
+* Candidate: the public key of the validator candidate: bonding too
+* Shares: the number of delegator shares received from the validator candidate
+* AdjustmentFeePool: Adjustment factor used to passively calculate each bonds
+  entitled fees from `GlobalState.FeePool`
+* AdjustmentRewardPool: Adjustment factor used to passively calculate each
+  bonds entitled fees from `Candidate.ProposerRewardPool`
+
  
 ### QueueElem
 
-Unbonding and re-delegation process is implemented using the ordered queue data structure. 
-All queue elements share a common structure:
+The Unbonding and re-delegation process is implemented using the ordered queue 
+data structure. All queue elements share a common structure:
 
-``` golang
+```go
 type QueueElem struct {
 	Candidate   crypto.PubKey
 	InitTime    int64    // when the element was added to the queue
 }
 ```
 
-The queue is ordered so the next element to unbond/re-delegate is at the head. Every
-tick the head of the queue is checked and if the unbonding period has passed
-since `InitTime`, the final settlement of the unbonding is started or re-delegation is executed, and the element is
-pop from the queue. Each `QueueElem` is persisted in the store until it is popped from the queue. 
+The queue is ordered so the next element to unbond/re-delegate is at the head. 
+Every tick the head of the queue is checked and if the unbonding period has 
+passed since `InitTime`, the final settlement of the unbonding is started or 
+re-delegation is executed, and the element is pop from the queue. Each 
+`QueueElem` is persisted in the store until it is popped from the queue. 
 
 ### QueueElemUnbondDelegation
 
 QueueElemUnbondDelegation structure is used in the unbonding queue. 
 
-``` golang
+```go
 type QueueElemUnbondDelegation struct {
 	QueueElem
 	Payout           Address       // account to pay out to
@@ -208,7 +226,7 @@ TODO: Explain what is StartSlashRation.
 
 QueueElemReDelegate structure is used in the re-delegation queue. 
 
-``` golang
+```go
 type QueueElemReDelegate struct {
 	QueueElem
 	Payout       Address       // account to pay out to
@@ -216,37 +234,41 @@ type QueueElemReDelegate struct {
     NewCandidate crypto.PubKey // validator to bond to after unbond
 }
 ```
-Q: Why we need Payout address in the re-delegation element?
+QUESTION: Why we need Payout address in the re-delegation element?
 
 ### Transaction Overview
 
 Available Transactions: 
- - TxDeclareCandidacy
- - TxEditCandidacy 
- - TxDelegate
- - TxUnbond 
- - TxRedelegate
- - TxLivelinessCheck
-  - TxProveLive
+* TxDeclareCandidacy
+* TxEditCandidacy 
+* TxDelegate
+* TxUnbond 
+* TxRedelegate
+* TxLivelinessCheck
+  * TxProveLive
 
 ## Transaction processing
 
-In this section we describe the processing of the transactions and the corresponding updates to the global state.
-In the following text we will use `gs` to refer to the `GlobalState` data structure, 
-`unbondDelegationQueue` is a reference to the `queue[QueueElemUnbondDelegation]`, `reDelegationQueue` is the reference for the 
-`queue[QueueElemReDelegate]`. We use `tx` to denote a reference to a transaction that is being processed, and `sender` to
-denote the address of the sender of the transaction. We use function `loadCandidate(store, PubKey)` to obtain a Candidate 
-structure from the store, and `saveCandidate(store, candidate)` to save it. Similarly, we use 
-`loadDelegatorBond(store, sender, PubKey)` to load delegator bond with the key (sender and PubKey) from the store, and 
- `saveDelegatorBond(store, sender, bond)` to save it. `removeDelegatorBond(store, sender, bond)` is used to remove the 
- bond from the store. 
-     
+In this section we describe the processing of the transactions and the 
+corresponding updates to the global state. In the following text we will use 
+`gs` to refer to the `GlobalState` data structure, `unbondDelegationQueue` is a
+reference to the `queue[QueueElemUnbondDelegation]`, `reDelegationQueue` is the 
+reference for the `queue[QueueElemReDelegate]`. We use `tx` to denote a 
+reference to a transaction that is being processed, and `sender` to denote the 
+address of the sender of the transaction. We use function 
+`loadCandidate(store, PubKey)` to obtain a Candidate structure from the store, 
+and `saveCandidate(store, candidate)` to save it. Similarly, we use 
+`loadDelegatorBond(store, sender, PubKey)` to load a delegator bond with the 
+key (sender and PubKey) from the store, and 
+`saveDelegatorBond(store, sender, bond)` to save it. 
+`removeDelegatorBond(store, sender, bond)` is used to remove the bond from the 
+store.
  
 ### TxDeclareCandidacy
 
 A validator candidacy is declared using the `TxDeclareCandidacy` transaction.
 
-``` golang
+```go
 type TxDeclareCandidacy struct {
     PubKey              crypto.PubKey
     Amount              coin.Coin       
@@ -256,9 +278,7 @@ type TxDeclareCandidacy struct {
     CommissionMaxChange int64 
     Description         Description
 }
-``` 
 
-``` 
 declareCandidacy(tx TxDeclareCandidacy):
     candidate = loadCandidate(store, tx.PubKey)
     if candidate != nil then return // candidate with that public key already exists 
@@ -275,8 +295,9 @@ declareCandidacy(tx TxDeclareCandidacy):
    
     txDelegate = TxDelegate(tx.PubKey, tx.Amount)
     return delegateWithCandidate(txDelegate, candidate) 
-``` 
+
 // see delegateWithCandidate function in [TxDelegate](TxDelegate)
+``` 
 
 ### TxEditCandidacy
 
@@ -284,15 +305,13 @@ If either the `Description` (excluding `DateBonded` which is constant),
 `Commission`, or the `GovernancePubKey` need to be updated, the
 `TxEditCandidacy` transaction should be sent from the owner account:
 
-``` golang
+```go
 type TxEditCandidacy struct {
     GovernancePubKey    crypto.PubKey
     Commission          int64  
     Description         Description
 }
-```
  
-```
 editCandidacy(tx TxEditCandidacy):
     candidate = loadCandidate(store, tx.PubKey)
     if candidate == nil or candidate.Status == Revoked return 
@@ -303,22 +322,21 @@ editCandidacy(tx TxEditCandidacy):
     
     saveCandidate(store, candidate)
     return
-  ```
+```
      	
 ### TxDelegate
 
-Delegator bonds are created using the `TxDelegate` transaction. Within this transaction the delegator provides 
-an amount of coins, and in return receives some amount of candidate's delegator shares that are assigned to 
+Delegator bonds are created using the `TxDelegate` transaction. Within this 
+transaction the delegator provides an amount of coins, and in return receives 
+some amount of candidate's delegator shares that are assigned to 
 `DelegatorBond.Shares`. 
 
-``` golang 
+```go
 type TxDelegate struct { 
 	PubKey crypto.PubKey
 	Amount coin.Coin       
 }
-```
 
-```
 delegate(tx TxDelegate):
     candidate = loadCandidate(store, tx.PubKey)
     if candidate == nil then return
@@ -378,17 +396,15 @@ exchangeRate(shares rational.Rat, tokenAmount int64):
 ```
 
 ### TxUnbond 
+
 Delegator unbonding is defined with the following transaction:
 
-``` golang
+```go
 type TxUnbond struct { 
 	PubKey crypto.PubKey
 	Shares rational.Rat 
 }
-```
 
-```
-unbond(tx TxUnbond):
 	bond = loadDelegatorBond(store, sender, tx.PubKey)
 	if bond == nil then return 
 	if bond.Shares < tx.Shares return 
@@ -481,15 +497,13 @@ bondedToUnbondedPool(candidate Candidate):
 The re-delegation command allows delegators to switch validators while still
 receiving equal reward to as if they had never unbonded.
 
-``` golang
+```go
 type TxRedelegate struct { 
 	PubKeyFrom crypto.PubKey
 	PubKeyTo   crypto.PubKey
 	Shares     rational.Rat 
 }
-```
 
-```
 redelegate(tx TxRedelegate):
     bond = loadDelegatorBond(store, sender, tx.PubKey)
     if bond == nil then return 
@@ -513,14 +527,14 @@ the block header. A queue is persisted which contains the block headers from
 all recent blocks for the duration of the unbonding period. A validator is
 defined as having livliness issues if they have not been included in more than
 33% of the blocks over: 
- - The most recent 24 Hours if they have >= 20% of global stake
- - The most recent week if they have = 0% of global stake
- - Linear interpolation of the above two scenarios
+* The most recent 24 Hours if they have >= 20% of global stake
+* The most recent week if they have = 0% of global stake
+* Linear interpolation of the above two scenarios
 
 Liveliness kicks are only checked when a `TxLivelinessCheck` transaction is
 submitted. 
 
-``` golang
+```go
 type TxLivelinessCheck struct {
     PubKey        crypto.PubKey
     RewardAccount Addresss
@@ -540,7 +554,7 @@ transacted to move will be bonded back to the now-live validator and begin to
 once again collect provisions and rewards. Regaining liveliness is demonstrated
 by sending in a `TxProveLive` transaction:
 
-``` golang
+```go
 type TxProveLive struct {
     PubKey crypto.PubKey
 }
@@ -550,7 +564,7 @@ TODO: Add pseudo-code for handler logic!
 
 ### End of block handling
 
-```
+```go
 tick(ctx Context):
     hrsPerYr = 8766   // as defined by a julian year of 365.25 days
     
@@ -569,7 +583,7 @@ tick(ctx Context):
         // save the params
         saveGlobalState(store, gs)
     
-   `unbondDelegationQueue` is a reference to the `queue[QueueElemUnbondDelegation]`, `reDelegationQueue`
+   // `unbondDelegationQueue` is a reference to the `queue[QueueElemUnbondDelegation]`, `reDelegationQueue`
     
     if time > unbondDelegationQueue.head().InitTime + UnbondingPeriod then 
         for each element elem in the unbondDelegationQueue where time > elem.InitTime + UnbondingPeriod do
@@ -646,5 +660,4 @@ unbondedToBondedPool(candidate Candidate):
 	candidate.Status = Bonded
 
 	return transfer(address of the unbonded pool, address of the bonded pool, removedTokens)
-
 ```
