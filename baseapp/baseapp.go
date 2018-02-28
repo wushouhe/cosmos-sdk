@@ -345,7 +345,7 @@ func (app *BaseApp) runTx(isCheckTx bool, txBytes []byte, tx sdk.Tx) (result sdk
 	ctx = ctx.WithMultiStore(msCache)
 
 	// Match and run route.
-	msgType := msg.Type()
+	msgType := msg.MsgType()
 	handler := app.router.Route(msgType)
 	result = handler(ctx, msg)
 

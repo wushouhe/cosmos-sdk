@@ -21,7 +21,7 @@ func NewSendMsg(in []Input, out []Output) SendMsg {
 }
 
 // Implements Msg.
-func (msg SendMsg) Type() string { return "bank" } // TODO: "bank/send"
+func (msg SendMsg) MsgType() string { return "bank" } // TODO: "bank/send"
 
 // Implements Msg.
 func (msg SendMsg) ValidateBasic() sdk.Error {
@@ -96,7 +96,7 @@ func NewIssueMsg(banker crypto.Address, out []Output) IssueMsg {
 }
 
 // Implements Msg.
-func (msg IssueMsg) Type() string { return "bank" } // TODO: "bank/send"
+func (msg IssueMsg) MsgType() string { return "bank" } // TODO: "bank/send"
 
 // Implements Msg.
 func (msg IssueMsg) ValidateBasic() sdk.Error {
