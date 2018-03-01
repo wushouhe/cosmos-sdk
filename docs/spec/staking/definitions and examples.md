@@ -38,7 +38,7 @@
 
 At the core of the Staking module is the concept of a pool which denotes 
 collection of Atoms contributed by different Atom holders. There are two global
-pools in the Staking module: the bonded pool and unbonded pool. Bonded Atoms 
+pools in the Staking module: the bonded pool and unbonding pool. Bonded Atoms 
 are part of the global bonded pool. On the other side, if a candidate or 
 delegator wants to unbond its Atoms, those Atoms are kept in the unbonding pool
 for the duration of the unbonding period. In the Staking module, a pool is 
@@ -52,23 +52,23 @@ The share-to-atom exchange rate can be computed as:
 
 `share-to-atom-exchange-rate = size of the pool / ammount of issued shares`
 
-Then for each candidate (in a per candidate data structure) we keep track of
-an amount of shares the candidate is owning in a pool. At any point in time, 
+Then for each validator candidate (in a per candidate data structure) we keep track of
+an amount of shares the candidate owns in a pool. At any point in time, 
 the exact amount of Atoms a candidate has in the pool can be computed as the 
-number of shares it owns multiplied with the share-to-atom exchange rate:
+number of shares it owns multiplied with the current share-to-atom exchange rate:
 
 `candidate-coins = candidate.Shares * share-to-atom-exchange-rate`
 
 The benefit of such accounting of the pool resources is the fact that a 
 modification to the pool because of bonding/unbonding/slashing/provisioning of 
 atoms affects only global data (size of the pool and the number of shares) and 
-the related validator/candidate data structure, i.e., the data structure of 
+not the related validator/candidate data structure, i.e., the data structure of 
 other validators do not need to be modified. This has the advantage that 
 modifying global data is much cheaper computationally than modifying data of
 every validator. Let's explain this further with several small examples: 
 
 We consider initially 4 validators p1, p2, p3 and p4, and that each validator 
-has bonded 10 Atoms to a bonded pool. Furthermore, let's assume that we have 
+has bonded 10 Atoms to the bonded pool. Furthermore, let's assume that we have 
 issued initially 40 shares (note that the initial distribution of the shares, 
 i.e., share-to-atom exchange rate can be set to any meaningful value), i.e., 
 share-to-atom-ex-rate = 1 atom per share. Then at the global pool level we 
@@ -86,7 +86,7 @@ changed (1 share is still worth 1 Atom), we need to create more shares, i.e. we
 now have 50 shares in the pool in total. Validators p2, p3 and p4 still have 
 (correspondingly) 10, 10 and 5 shares each worth of 1 atom per share, so we 
 don't need to modify anything in their corresponding data structures. But p1 
-now has 25 shares, so we update the amount of shares owned by the p1 in its 
+now has 25 shares, so we update the amount of shares owned by p1 in its 
 data structure. Note that apart from the size of the pool that is in Atoms, all
 other data structures refer only to shares.
 
@@ -111,7 +111,7 @@ delegators (we will explain this in section X).
 #### Delegator shares
 
 A candidate is, depending on it's status, contributing Atoms to either the 
-bonded or unbonded pool, and in return gets some amount of (global) pool 
+bonded or unbonding pool, and in return gets some amount of (global) pool 
 shares. Note that not all those Atoms (and respective shares) are owned by the 
 candidate as some Atoms could be delegated to a candidate. The mechanism for 
 distribution of Atoms (and shares) between a candidate and it's delegators is 
@@ -123,7 +123,7 @@ is the same as described in [Section](#The pool and the share). We now
 illustrate it with an example.
 
 Let's consider 4 validators p1, p2, p3 and p4, and assume that each validator 
-has bonded 10 Atoms to a bonded pool. Furthermore, let's assume that we have 
+has bonded 10 Atoms to the bonded pool. Furthermore, let's assume that we have 
 issued initially 40 global shares, i.e., that 
 `share-to-atom-exchange-rate = 1 atom per share`. So we will set 
 `GlobalState.BondedPool = 40` and `GlobalState.BondedShares = 40` and in the 
@@ -145,7 +145,7 @@ that the amount of global and delegator shares stay the same but they are now
 worth more as share-to-atom-exchange-rate is now worth 50/45 Atoms per share. 
 Therefore, a delegator d1 now owns:
 
-`delegatorCoins = 10 (delegator shares) * 1 (delegator-share-to-global-share-ex-rate) * 50/45 (share-to-atom-ex-rate) = 100/9 Atoms`  
+`delegatorCoins = 5 (delegator shares) * 1 (delegator-share-to-global-share-ex-rate) * 50/45 (share-to-atom-ex-rate) = 5.55 Atoms`  
 
 ### Inflation provisions
 
@@ -154,7 +154,7 @@ hour). The annual target of between 7% and 20%. The long-term target ratio of
 bonded tokens to unbonded tokens is 67%.
 
 The target annual inflation rate is recalculated for each previsions cycle. The
-inflation is also subject to a rate change (positive of negative) depending or
+inflation is also subject to a rate change (positive or negative) depending on
 the distance from the desired ratio (67%). The maximum rate change possible is
 defined to be 13% per year, however the annual inflation is capped as between
 7% and 20%.

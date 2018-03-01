@@ -65,8 +65,8 @@ type GlobalState struct {
     TotalSupply              int64        // total supply of Atoms
     BondedPool               int64        // reserve of bonded tokens
     BondedShares             rational.Rat // sum of all shares distributed for the BondedPool
-    UnbondedPool             int64        // reserve of unbonded tokens held with candidates
-    UnbondedShares           rational.Rat // sum of all shares distributed for the UnbondedPool
+    UnbondingPool             int64        // reserve of unbonding tokens held with candidates
+    UnbondingShares           rational.Rat // sum of all shares distributed for the UnbondingPool
     InflationLastTime        int64        // timestamp of last processing of inflation
     Inflation                rational.Rat // current annual inflation rate
     DateLastCommissionReset  int64        // unix timestamp for last commission accounting reset
@@ -77,7 +77,7 @@ type GlobalState struct {
 
 type Params struct {
 	HoldBonded   Address // account  where all bonded coins are held
-	HoldUnbonded Address // account where all delegated but unbonded coins are held
+	HoldUnbonding Address // account where all delegated but unbonding coins are held
 
 	InflationRateChange rational.Rational // maximum annual change in inflation rate
 	InflationMax        rational.Rational // maximum inflation rate
@@ -105,9 +105,9 @@ actions of validators or candidate-validators.
 ``` go
 type Candidate struct {
     Status                 CandidateStatus       
-    PubKey                 crypto.PubKey
+    ConsensusPubKey        crypto.PubKey
     GovernancePubKey       crypto.PubKey
-    Owner                  Address
+    Owner                  crypto.Address
     GlobalStakeShares      rational.Rat 
     IssuedDelegatorShares  rational.Rat
     RedelegatingShares     rational.Rat
@@ -131,13 +131,13 @@ type Description struct {
 ```
 
 Candidate parameters are described:
-* Status: it can be Bonded (active validator), Unbonded (validator candidate) 
+* Status: it can be Bonded (active validator), Unbonding (validator candidate) 
   or Revoked
-* PubKey: candidate public key that is used strictly for participating in 
+* ConsensusPubKey: candidate public key that is used strictly for participating in 
   consensus
-* Owner: Address where coins are bonded from and unbonded to 
+* Owner: Address that is allowed to unbond coins.
 * GlobalStakeShares: Represents shares of `GlobalState.BondedPool` if 
-  `Candidate.Status` is `Bonded`; or shares of `GlobalState.UnbondedPool` 
+  `Candidate.Status` is `Bonded`; or shares of `GlobalState.Unbondingt Pool` 
   otherwise
 * IssuedDelegatorShares: Sum of all shares a candidate issued to delegators 
   (which includes the candidate's self-bond); a delegator share represents 
@@ -204,7 +204,7 @@ type QueueElem struct {
 The queue is ordered so the next element to unbond/re-delegate is at the head. 
 Every tick the head of the queue is checked and if the unbonding period has 
 passed since `InitTime`, the final settlement of the unbonding is started or 
-re-delegation is executed, and the element is pop from the queue. Each 
+re-delegation is executed, and the element is popped from the queue. Each 
 `QueueElem` is persisted in the store until it is popped from the queue. 
 
 ### QueueElemUnbondDelegation
@@ -270,7 +270,7 @@ A validator candidacy is declared using the `TxDeclareCandidacy` transaction.
 
 ```go
 type TxDeclareCandidacy struct {
-    PubKey              crypto.PubKey
+    ConsensusPubKey              crypto.PubKey
     Amount              coin.Coin       
     GovernancePubKey    crypto.PubKey
     Commission          rational.Rat
