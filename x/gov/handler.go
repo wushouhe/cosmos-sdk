@@ -12,8 +12,6 @@ func NewHandler(gm governanceMapper) sdk.Handler {
 		switch msg := msg.(type) {
 		case DepositMsg:
 			return handleDepositMsg(ctx, gm, msg)
-		case ClaimDepositMsg:
-			return handleClaimDepositMsg(ctx, gm, msg)
 		case SubmitProposalMsg:
 			return handleSubmitProposalMsg(ctx, gm, msg)
 		case VoteMsg:
@@ -62,11 +60,6 @@ func handleDepositMsg(ctx sdk.Context, gm GovernanceMapper, msg DepositMsg) sdk.
 		proposal.InitTotalVotingPower = TotalVotingPower
 	}
 
-	return sdk.Result{} // TODO
-}
-
-// Handle SendMsg.
-func handleClaimDepositMsg(ctx sdk.Context, gm GovernanceMapper, msg ClaimDepositMsg) sdk.Result {
 	return sdk.Result{} // TODO
 }
 
