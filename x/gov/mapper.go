@@ -7,7 +7,10 @@ import (
 type governanceMapper struct {
 
 	// The (unexposed) key used to access the store from the Context.
-	key sdk.StoreKey
+	proposalStoreKey sdk.StoreKey
+
+	// The (unexposed) key used to access the store from the Context.
+	proposalStoreey sdk.StoreKey
 
 	// The wire codec for binary encoding/decoding of accounts.
 	cdc *wire.Codec
@@ -31,21 +34,40 @@ func (gm governanceMapper) WireCodec() *wire.Codec {
 	return gm.cdc
 }
 
-// Implements sdk.AccountMapper.
-func (am accountMapper) GetProposal(ctx sdk.Context, addr crypto.Address) sdk.Account {
+func (gm governanceMapper) GetProposal(ctx sdk.Context, proposalId int64) sdk.Account {
 	store := ctx.KVStore(am.key)
-	bz := store.Get(addr)
+	bz := store.Get(proposalId)
 	if bz == nil {
 		return nil
 	}
-	acc := am.decodeAccount(bz)
+	proposal := gm.decodeProposal(bz)
 	return acc
 }
 
 // Implements sdk.AccountMapper.
-func (am accountMapper) SetAccount(ctx sdk.Context, acc sdk.Account) {
-	addr := acc.GetAddress()
+func (gm governanceMapper) SetProposal(ctx sdk.Context, proposal Proposal) {
+	proposalId := proposal.ProposalId
 	store := ctx.KVStore(am.key)
-	bz := am.encodeAccount(acc)
-	store.Set(addr, bz)
+	bz := gm.encodeProposal(proposal)
+	store.Set(proposalId, bz)
+}
+
+func (gm governanceMapper) encodeProposal(proposal Proposal) []byte {
+	bz, err := gm.cdc.MarshalBinary(proposal)
+	if err != nil {
+		panic(err)
+	}
+	return bz
+}
+
+func (gm governanceMapper) decodeProposal(bz []byte) Proposal {
+	// TODO
+
+	proposal := am.clonePrototypePtr()
+	err := gm.cdc.UnmarshalBinary(bz, proposal)
+	if err != nil {
+		panic(err)
+	}
+
+	return proposal
 }
