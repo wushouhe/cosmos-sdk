@@ -6,15 +6,16 @@ import (
 )
 
 type DepositMsg struct {
-	ProposalId    int64          `json:"proposal_id"`    // ID of the proposal
-	Depositer     crypto.address `json:"depositer"`      // Address of the depositer
-	DepositAmount sdk.Coins      `json:"deposit_amount"` // Coins to add to the proposal's deposit
+	ProposalId int64          `json:"proposal_id"` // ID of the proposal
+	Depositer  crypto.address `json:"depositer"`   // Address of the depositer
+	Amount     sdk.Coins      `json:"amount"`      // Coins to add to the proposal's deposit
 }
 
-func NewDepositMsgMsg(proposalId int64, depositAmount Deposit) DepositMsg {
+func NewDepositMsgMsg(proposalId int64, depositer crypto.address, amount sdk.Coins) DepositMsg {
 	return DepositMsg{
-		ProposalId:    proposalId,
-		DepositAmount: depositAmount,
+		ProposalId: proposalId,
+		Depositer:  depositer,
+		Amount:     Amount,
 	}
 }
 
@@ -36,7 +37,7 @@ func (msg DepositMsg) ValidateBasic() sdk.Error {
 }
 
 func (msg DepositMsg) String() string {
-	return fmt.Sprintf("DepositMsg{%v=>%v: %v}", msg.Depositer, msg.ProposerId, msg.DepositAmount)
+	return fmt.Sprintf("DepositMsg{%v=>%v: %v}", msg.Depositer, msg.ProposerId, msg.Amount)
 }
 
 // Implements Msg.
