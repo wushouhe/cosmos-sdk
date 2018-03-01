@@ -31,11 +31,35 @@ func handleDepositMsg(ctx sdk.Context, gm GovernanceMapper, msg DepositMsg) sdk.
 	proposal := gm.getProposal(ctx, msg.ProposalId)
 
 	if proposal == nil {
-		// throw
+		return nil // TODO: Return proper Error
 	}
+
+	if proposal.VotingStartBlock == -1 {
+		return nil // TODO: Return proper Error
+	}
+
+	deposit := Deposit{
+		Depositer: msg.Depositer,
+		Amount:    msg.Amount,
+	}
+
+	res, err := am.cm.SubtractCoins(ctx, deposit.Depositer, deposit.Amount)
+
+	if err {
+		return nil // TODO: Return proper Error
+	}
+
+	proposal.TotalDeposit = proposal.TotalDeposit.Plus(deposit.Amount)
+
+	proposal.Deposits = append(proposal.Deposits, deposit)
 
 	if ctx.isCheckTx() {
 		return sdk.Result{} // TODO
+	}
+
+	if proposal.TotalDeposit.IsGTE(proposal.procedure.MinDeposit) {
+		proposal.VotingStartBlock = ctx.BlockHeight()
+		proposal.InitTotalVotingPower = TotalVotingPower
 	}
 
 	return sdk.Result{} // TODO

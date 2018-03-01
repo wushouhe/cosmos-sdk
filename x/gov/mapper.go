@@ -1,26 +1,26 @@
 package gov
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	wire "github.com/tendermint/go-wire"
 )
 
 type governanceMapper struct {
+	ck bank.CoinKeeper
 
 	// The (unexposed) key used to access the store from the Context.
 	proposalStoreKey sdk.StoreKey
-
-	// The (unexposed) key used to access the store from the Context.
-	proposalStoreey sdk.StoreKey
 
 	// The wire codec for binary encoding/decoding of accounts.
 	cdc *wire.Codec
 }
 
 // NewGovernanceMapper returns a mapper that uses go-wire to (binary) encode and decode gov types.
-func NewGovernanceMapper(key sdk.StoreKey, proto sdk.Account) accountMapper {
+func NewGovernanceMapper(key sdk.StoreKey, ck bank.CoinKeeper) accountMapper {
 	cdc := wire.NewCodec()
 	return accountMapper{
 		key: key,
+		ck:  ck,
 		cdc: cdc,
 	}
 }
