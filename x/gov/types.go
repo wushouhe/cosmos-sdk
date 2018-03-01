@@ -17,12 +17,12 @@ type Proposal struct {
 	ProposalType string    `json:"proposal_type"` //  Type of proposal. Initial set {PlainTextProposal, SoftwareUpgradeProposal}
 	TotalDeposit sdk.Coins `json:"total_deposit"` //  Current deposit on this proposal. Initial value is set at InitialDeposit
 
-	Deposits []sdk.Coins `json:"deposits"` //  Current deposit on this proposal. Initial value is set at InitialDeposit
+	Deposits []Deposit `json:"deposits"` //  Current deposit on this proposal. Initial value is set at InitialDeposit
 
 	SubmitBlock          int64 `json:"submit_block"`            //  Height of the block where TxGovSubmitProposal was included
 	VotingStartBlock     int64 `json:"voting_start_block"`      //  Height of the block where MinDeposit was reached. -1 if MinDeposit is not reached
 	InitTotalVotingPower int64 `json:"init_total_voting_power"` //  Total voting power when proposal enters voting period (default 0)
-	InitProcedureNumber  int16 `json:"init_procedure_number"`   //  Procedure number of the active procedure when proposal enters voting period (default -1)
+	InitProcedure        int16 `json:"init_procedure"`          //  Procedure number of the active procedure when proposal enters voting period (default -1)
 }
 
 // Procedure
