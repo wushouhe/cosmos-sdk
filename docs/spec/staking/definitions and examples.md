@@ -11,22 +11,20 @@
   validator (TODO: add link to Validator definition))
 * Validator - a candidate that is currently selected among a set of candidates 
   to be able to sign protocol messages in the Tendermint consensus protocol 
-* Delegator - an Atom holder that has bonded any of its Atoms by delegating 
+* Delegator - an Atom holder that has bonded some of its Atoms by delegating 
   them to a validator (or a candidate) 
 * Bonding Atoms - a process of locking Atoms in a bond deposit (putting Atoms 
   under protocol control). Atoms are always bonded through a validator (or 
   candidate) process. Bonded atoms can be slashed (burned) in case a validator 
-  process misbehaves (does not behave according to a protocol specification). 
-  An Atom holder can regain access to its bonded Atoms (if they are not slashed 
-  in the meantime), i.e., they can be moved to its account,  after the 
-  Unbonding period has expired. 
+  process misbehaves (does not behave according to the protocol specification). 
+  Atom holders can regain access to their bonded Atoms if they have not been 
+  slashed by waiting an Unbonding period.
 * Unbonding period - a period of time after which Atom holder gains access to 
   its bonded Atoms (they can be withdrawn to a user account) or they can be 
   re-delegated.
-* Inflationary provisions - inflation is a process of increasing Atom supply. 
-  Atoms are being created in the process of (Cosmos Hub) blocks creation. 
-  Owners of bonded atoms are rewarded for securing network with inflationary 
-  provisions proportional to their bonded Atom share.
+* Inflationary provisions - inflation is the process of increasing the Atom supply. 
+  Atoms are periodically created on the Cosmos Hub and issued to bonded Atom holders. 
+  The goal of inflation is to incentize most of the Atoms in existence to be bonded.
 * Transaction fees - transaction fee is a fee that is included in a Cosmsos Hub
   transaction. The fees are collected by the current validator set and 
   distributed among validators and delegators in proportion to their bonded 
@@ -36,32 +34,31 @@
 
 ## The pool and the share
 
-At the core of the Staking module is the concept of a pool which denotes 
+At the core of the Staking module is the concept of a pool which denotes a
 collection of Atoms contributed by different Atom holders. There are two global
 pools in the Staking module: the bonded pool and unbonding pool. Bonded Atoms 
-are part of the global bonded pool. On the other side, if a candidate or 
-delegator wants to unbond its Atoms, those Atoms are kept in the unbonding pool
-for the duration of the unbonding period. In the Staking module, a pool is 
-logical concept, i.e., there is no pool data structure that would be 
-responsible for managing pool resources. Instead, it is managed in a 
-distributed way. More precisely, at the global level, for each pool, we track 
-only the total amount of bonded or unbonded Atoms and the current amount of 
-issued shares. A share is a unit of Atom distribution and the value of the 
-share (share-to-atom exchange rate) is changing during the system execution. 
-The share-to-atom exchange rate can be computed as:
+are part of the global bonded pool. If a candidate or delegator wants to unbond 
+its Atoms, those Atoms are moved to the the unbonding pool for the duration of 
+the unbonding period. In the Staking module, a pool is a logical concept, i.e., 
+there is no pool data structure that would be responsible for managing pool 
+resources. Instead, it is managed in a distributed way. More precisely, at the 
+global level, for each pool, we track only the total amount of bonded or unbonded 
+Atoms and the current amount of issued shares. A share is a unit of Atom distribution 
+and the value of the share (share-to-atom exchange rate) changes during 
+system execution. The share-to-atom exchange rate can be computed as:
 
 `share-to-atom-exchange-rate = size of the pool / ammount of issued shares`
 
 Then for each validator candidate (in a per candidate data structure) we keep track of
-an amount of shares the candidate owns in a pool. At any point in time, 
+the amount of shares the candidate owns in a pool. At any point in time, 
 the exact amount of Atoms a candidate has in the pool can be computed as the 
 number of shares it owns multiplied with the current share-to-atom exchange rate:
 
 `candidate-coins = candidate.Shares * share-to-atom-exchange-rate`
 
 The benefit of such accounting of the pool resources is the fact that a 
-modification to the pool because of bonding/unbonding/slashing/provisioning of 
-atoms affects only global data (size of the pool and the number of shares) and 
+modification to the pool from bonding/unbonding/slashing/provisioning of 
+Atoms affects only global data (size of the pool and the number of shares) and 
 not the related validator/candidate data structure, i.e., the data structure of 
 other validators do not need to be modified. This has the advantage that 
 modifying global data is much cheaper computationally than modifying data of
@@ -153,7 +150,7 @@ Validator provisions are minted on an hourly basis (the first block of a new
 hour). The annual target of between 7% and 20%. The long-term target ratio of
 bonded tokens to unbonded tokens is 67%.
 
-The target annual inflation rate is recalculated for each previsions cycle. The
+The target annual inflation rate is recalculated for each provisions cycle. The
 inflation is also subject to a rate change (positive or negative) depending on
 the distance from the desired ratio (67%). The maximum rate change possible is
 defined to be 13% per year, however the annual inflation is capped as between
@@ -177,7 +174,7 @@ provisionTokensHourly = GlobalState.TotalSupply * GlobalState.Inflation / (365.2
 Because the validators hold a relative bonded share (`GlobalStakeShares`), when
 more bonded tokens are added proportionally to all validators, the only term
 which needs to be updated is the `GlobalState.BondedPool`. So for each 
-previsions cycle:
+provisions cycle:
 
 ```go
 GlobalState.BondedPool += provisionTokensHourly

@@ -135,6 +135,7 @@ Candidate parameters are described:
   or Revoked
 * ConsensusPubKey: candidate public key that is used strictly for participating in 
   consensus
+* GovernancePubKey: public key used by the validator for governance voting 
 * Owner: Address that is allowed to unbond coins.
 * GlobalStakeShares: Represents shares of `GlobalState.BondedPool` if 
   `Candidate.Status` is `Bonded`; or shares of `GlobalState.Unbondingt Pool` 
@@ -220,7 +221,7 @@ type QueueElemUnbondDelegation struct {
 }
 ``` 
 
-TODO: Explain what is StartSlashRation.
+TODO: Explain what is StartSlashRatio.
 
 ### QueueElemReDelegate
 
@@ -234,7 +235,7 @@ type QueueElemReDelegate struct {
     NewCandidate crypto.PubKey // validator to bond to after unbond
 }
 ```
-QUESTION: Why we need Payout address in the re-delegation element?
+TODO: Why we need Payout address in the re-delegation element?
 
 ### Transaction Overview
 
@@ -346,9 +347,9 @@ delegateWithCandidate(tx TxDelegate, candidate Candidate):
     if candidate.Status == Revoked then return
 
 	if candidate.Status == Bonded then
-		poolAccount = address of the bonded pool
+		poolAccount = params.HoldBonded
 	else 
-		poolAccount = address of the unbonded pool
+		poolAccount = params.HoldUnbonded
 	
 	// Move coins from the delegator account to the bonded/unbonded pool account
 	err = transfer(sender, poolAccount, tx.Amount)
@@ -359,6 +360,7 @@ delegateWithCandidate(tx TxDelegate, candidate Candidate):
 	if bond == nil then 
 	    bond = DelegatorBond(tx.PubKey, rational.Zero, Coin(0), Coin(0))
 	
+    // add to the global pool and issue new delegator shares
 	issuedDelegatorShares = addTokens(tx.Amount, candidate)
 	bond.Shares += issuedDelegatorShares
 	
@@ -387,7 +389,7 @@ addTokens(amount coin.Coin, candidate Candidate):
 	
 	issuedDelegatorShares = issuedShares / exRate
 	candidate.IssuedDelegatorShares += issuedDelegatorShares
-	return
+	return issuedDelegatorShares
 	
 exchangeRate(shares rational.Rat, tokenAmount int64):
     if shares.IsZero() then return rational.One
