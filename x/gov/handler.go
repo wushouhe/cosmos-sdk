@@ -41,7 +41,7 @@ func handleDepositMsg(ctx sdk.Context, gm GovernanceMapper, msg DepositMsg) sdk.
 		Amount:    msg.Amount,
 	}
 
-	res, err := am.cm.SubtractCoins(ctx, deposit.Depositer, deposit.Amount)
+	res, err := gm.cm.SubtractCoins(ctx, deposit.Depositer, deposit.Amount)
 
 	if err {
 		return nil // TODO: Return proper Error
@@ -57,7 +57,16 @@ func handleDepositMsg(ctx sdk.Context, gm GovernanceMapper, msg DepositMsg) sdk.
 
 	if proposal.TotalDeposit.IsGTE(proposal.procedure.MinDeposit) {
 		proposal.VotingStartBlock = ctx.BlockHeight()
-		proposal.InitTotalVotingPower = TotalVotingPower
+		proposal.InitTotalVotingPower = TotalVotingPower // Get TotalVotingPower from stake store
+	}
+
+	validatorList := gm.sm.getValidatorList() // TODO: GetValidator list from staking module
+
+	for index, validator := range validatorList {
+		validatorGovInfo = ValidatorGovInfo{
+			InitVotingPower: gm.sm.getVotingP                      ower(validator), //
+			Minus:           0,
+		}
 	}
 
 	return sdk.Result{} // TODO
