@@ -43,3 +43,10 @@ type Deposit struct {
 	Depositer crypto.address `json:"depositer"` //  Address of the depositer
 	Amount    sdk.Coins      `json:"amount"`    //  Deposit amount
 }
+
+type ValidatorGovInfo struct {
+	ProposalId      int64 //  Id of the Proposal this validator
+	ValidatorAddr   int64 //  Address of the validator
+	InitVotingPower int64 //  Voting power of validator when proposal enters voting period
+	Minus           int64 //  Minus of validator, used to compute validator's voting power
+}
