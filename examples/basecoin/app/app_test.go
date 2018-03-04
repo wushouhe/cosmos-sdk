@@ -29,21 +29,14 @@ func newBasecoinApp() *BasecoinApp {
 func TestSendMsg(t *testing.T) {
 	bapp := newBasecoinApp()
 
+	addr1 := crypto.Address("input")
+	addr2 := crypto.Address("output")
+	coins := sdk.Coins{{"atom", 10}}
+
 	// Construct a SendMsg
 	var msg = bank.SendMsg{
-		Inputs: []bank.Input{
-			{
-				Address:  sdk.Address([]byte("input")),
-				Coins:    sdk.Coins{{"atom", 10}},
-				Sequence: 1,
-			},
-		},
-		Outputs: []bank.Output{
-			{
-				Address: sdk.Address([]byte("output")),
-				Coins:   sdk.Coins{{"atom", 10}},
-			},
-		},
+		Inputs:  []bank.Input{bank.NewInput(addr1, coins)},
+		Outputs: []bank.Output{bank.NewOutput(addr2, coins)},
 	}
 
 	priv := crypto.GenPrivKeyEd25519()
@@ -119,7 +112,7 @@ func TestSendMsgWithAccounts(t *testing.T) {
 	pk1 := priv1.PubKey()
 	addr1 := pk1.Address()
 
-	// Second key receies
+	// Second key receives
 	pk2 := crypto.GenPrivKeyEd25519().PubKey()
 	addr2 := pk2.Address()
 
@@ -152,20 +145,10 @@ func TestSendMsgWithAccounts(t *testing.T) {
 	assert.Equal(t, acc1, res1)
 
 	// Construct a SendMsg
+	coins = sdk.Coins{{"foocoin", 10}}
 	var msg = bank.SendMsg{
-		Inputs: []bank.Input{
-			{
-				Address:  sdk.Address(addr1),
-				Coins:    sdk.Coins{{"foocoin", 10}},
-				Sequence: 1,
-			},
-		},
-		Outputs: []bank.Output{
-			{
-				Address: sdk.Address(addr2),
-				Coins:   sdk.Coins{{"foocoin", 10}},
-			},
-		},
+		Inputs:  []bank.Input{bank.NewInput(addr1, coins)},
+		Outputs: []bank.Output{bank.NewOutput(addr2, coins)},
 	}
 
 	// Sign the tx
