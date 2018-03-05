@@ -15,9 +15,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	keybase "github.com/cosmos/cosmos-sdk/client/keys"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	wire "github.com/cosmos/cosmos-sdk/wire"
 	abci "github.com/tendermint/abci/types"
 	keys "github.com/tendermint/go-crypto/keys"
-	wire "github.com/tendermint/go-wire"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
